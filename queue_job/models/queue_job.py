@@ -97,6 +97,10 @@ class QueueJob(models.Model):
     @api.depends('model_name', 'method_name', 'job_function_id.channel_id')
     def _compute_job_function(self):
         for record in self:
+            # by pass computing in migration process
+            # to improve with conditionnal test
+            continue
+            # end by pass
             model = self.env[record.model_name]
             method = getattr(model, record.method_name)
             channel_method_name = channel_func_name(method)
