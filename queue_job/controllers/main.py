@@ -9,9 +9,9 @@ from cStringIO import StringIO
 
 from psycopg2 import OperationalError
 
-import odoo
-from odoo import _, http, tools
-from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
+import openerp as odoo
+from openerp import _, http, tools
+from openerp.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
 from ..job import Job, ENQUEUED
 from ..exception import (NoSuchJobError,

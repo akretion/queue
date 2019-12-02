@@ -10,7 +10,7 @@ import uuid
 import sys
 from datetime import datetime, timedelta
 
-import odoo
+import openerp as odoo
 
 from .exception import (NoSuchJobError,
                         FailedJobError,

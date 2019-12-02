@@ -6,8 +6,38 @@ import json
 from datetime import datetime, date
 
 import dateutil
+import dateutil.parser
 
-from odoo import fields, models
+from openerp import fields, models
+from openerp import osv
+
+
+class job_serialized(osv.fields._column):
+    """ A field able to store an arbitrary python data structure.
+
+        Note: only plain components allowed.
+    """
+    _type = 'job_serialized'
+    __slots__ = []
+
+    def _symbol_set_struct(val):
+        return simplejson.dumps(val)
+
+    def _symbol_get_struct(self, val):
+        return simplejson.loads(val or '{}')
+
+    _symbol_c = '%s'
+    _symbol_f = _symbol_set_struct
+    _symbol_set = (_symbol_c, _symbol_f)
+    _symbol_get = _symbol_get_struct
+
+    def __init__(self, *args, **kwargs):
+        kwargs['_prefetch'] = kwargs.get('_prefetch', False)
+        super(job_serialized, self).__init__(*args, **kwargs)
+
+
+osv.fields.job_serialized = job_serialized
+models.FIELDS_TO_PGTYPES[job_serialized] = 'text'
 
 
 class JobSerialized(fields.Field):
@@ -25,6 +55,9 @@ class JobSerialized(fields.Field):
             return value
         else:
             return json.loads(value, cls=JobDecoder, env=record.env)
+
+
+fields.JobSerialized = JobSerialized
 
 
 class JobEncoder(json.JSONEncoder):

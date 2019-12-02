@@ -150,8 +150,8 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import requests
 
-import odoo
-from odoo.tools import config
+import openerp as odoo
+from openerp.tools import config
 
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 

@@ -3,9 +3,9 @@
 
 from psycopg2 import IntegrityError
 
-import odoo
+import openerp as odoo
 
-from odoo.tests import common
+from openerp.tests import common
 
 
 class TestJobChannel(common.TransactionCase):
@@ -44,7 +44,6 @@ class TestJobChannel(common.TransactionCase):
         })
         self.assertEqual(channel.name, 'sub')
         self.assertEqual(channel.complete_name, 'root.sub')
-
         with self.assertRaises(IntegrityError):
             self.Channel.create({
                 'name': 'sub',
