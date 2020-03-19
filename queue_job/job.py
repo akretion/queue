@@ -9,6 +9,7 @@ import logging
 import uuid
 import sys
 from datetime import datetime, timedelta
+import json
 
 import openerp as odoo
 
@@ -451,7 +452,7 @@ class Job(object):
             company_id = company_model._company_default_get(
                 object='queue.job',
                 field='company_id'
-            ).id
+            )
         self.company_id = company_id
         self._eta = None
         self.eta = eta
@@ -510,7 +511,6 @@ class Job(object):
             vals['eta'] = dt_to_string(self.eta)
         if self.identity_key:
             vals['identity_key'] = self.identity_key
-
         db_record = self.db_record()
         if db_record:
             db_record.write(vals)

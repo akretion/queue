@@ -11,6 +11,8 @@ import dateutil.parser
 from openerp import fields, models
 from openerp import osv
 
+import simplejson
+
 
 class job_serialized(osv.fields._column):
     """ A field able to store an arbitrary python data structure.
@@ -51,10 +53,7 @@ class JobSerialized(fields.Field):
     def convert_to_cache(self, value, record, validate=True):
         # cache format: dict
         value = value or {}
-        if isinstance(value, dict):
-            return value
-        else:
-            return json.loads(value, cls=JobDecoder, env=record.env)
+        return value
 
 
 fields.JobSerialized = JobSerialized

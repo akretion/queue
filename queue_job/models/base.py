@@ -88,3 +88,4 @@ def with_delay(self, priority=None, eta=None,
 
 models.AbstractModel._register_hook = _register_hook
 models.AbstractModel.with_delay = with_delay
+models.Model.with_delay = with_delay
