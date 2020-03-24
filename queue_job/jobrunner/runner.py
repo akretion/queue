@@ -190,9 +190,39 @@ def _odoo_now():
     dt = datetime.datetime.utcnow()
     return _datetime_to_epoch(dt)
 
+def odoo_connection_info_for(db_or_uri):
+    """ parse the given `db_or_uri` and return a 2-tuple (dbname, connection_params)
+
+    Connection params are either a dictionary with a single key ``dsn``
+    containing a connection URI, or a dictionary containing connection
+    parameter keywords which psycopg2 can build a key/value connection string
+    (dsn) from
+
+    :param str db_or_uri: database name or postgres dsn
+    :rtype: (str, dict)
+    """
+    if db_or_uri.startswith(('postgresql://', 'postgres://')):
+        # extract db from uri
+        us = urls.url_parse(db_or_uri)
+        if len(us.path) > 1:
+            db_name = us.path[1:]
+        elif us.username:
+            db_name = us.username
+        else:
+            db_name = us.hostname
+        return db_name, {'dsn': db_or_uri}
+
+    connection_info = {'database': db_or_uri}
+    for p in ('host', 'port', 'user', 'password', 'sslmode'):
+        cfg = odoo.tools.config.get('db_' + p)
+        if cfg:
+            connection_info[p] = cfg
+
+    return db_or_uri, connection_info
+
 
 def _connection_info_for(db_name):
-    db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
+    db_or_uri, connection_info = odoo_connection_info_for(db_name)
 
     for p in ('host', 'port'):
         cfg = (os.environ.get('ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper()) or
