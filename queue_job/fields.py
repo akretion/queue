@@ -51,8 +51,6 @@ class JobSerialized(fields.Field):
         return json.dumps(value, cls=JobEncoder)
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: dict
-        value = value or {}
         return value
 
 
