@@ -10,7 +10,7 @@ import uuid
 import sys
 from datetime import datetime, timedelta
 
-import odoo
+import openerp
 
 from .exception import (NoSuchJobError,
                         FailedJobError,
@@ -266,7 +266,7 @@ class Job(object):
         recordset = model.browse(stored.record_ids)
         method = getattr(recordset, method_name)
 
-        dt_from_string = odoo.fields.Datetime.from_string
+        dt_from_string = openerp.fields.Datetime.from_string
         eta = None
         if stored.eta:
             eta = dt_from_string(stored.eta)
@@ -393,7 +393,7 @@ class Job(object):
         assert isinstance(kwargs, dict), "%s: kwargs are not a dict" % kwargs
 
         if (not inspect.ismethod(func) or
-                not isinstance(func.im_class, odoo.models.MetaModel)):
+                not isinstance(func.im_class, openerp.models.MetaModel)):
             raise TypeError("Job accepts only methods of Models")
 
         recordset = func.im_self
@@ -448,10 +448,8 @@ class Job(object):
         else:
             company_model = env['res.company']
             company_model = company_model.sudo(self.user_id)
-            company_id = company_model._company_default_get(
-                object='queue.job',
-                field='company_id'
-            ).id
+            # TODO
+            company_id = 1
         self.company_id = company_id
         self._eta = None
         self.eta = eta
@@ -499,7 +497,7 @@ class Job(object):
                 'eta': False,
                 'identity_key': False,
                 }
-        dt_to_string = odoo.fields.Datetime.to_string
+        dt_to_string = openerp.fields.Datetime.to_string
         if self.date_enqueued:
             vals['date_enqueued'] = dt_to_string(self.date_enqueued)
         if self.date_started:
@@ -658,7 +656,7 @@ class Job(object):
 
 def _is_model_method(func):
     return (inspect.ismethod(func) and
-            isinstance(func.im_class, odoo.models.MetaModel))
+            isinstance(func.im_class, openerp.models.MetaModel))
 
 
 def job(func=None, default_channel='root', retry_pattern=None):

@@ -5,11 +5,11 @@
 import logging
 from datetime import datetime, timedelta
 
-from odoo import models, fields, api, exceptions, _
-from odoo.osv import expression
+from openerp import models, fields, api, exceptions, _
+from openerp.osv import expression
 
 from ..job import STATES, DONE, PENDING, Job
-from ..fields import JobSerialized
+from openerp.fields import JobSerialized
 
 _logger = logging.getLogger(__name__)
 
@@ -87,14 +87,13 @@ class QueueJob(models.Model):
 
     identity_key = fields.Char()
 
-    @api.model_cr
-    def init(self):
-        self._cr.execute(
+    def init(self, cr):
+        cr.execute(
             'SELECT indexname FROM pg_indexes WHERE indexname = %s ',
             ('queue_job_identity_key_state_partial_index',)
         )
-        if not self._cr.fetchone():
-            self._cr.execute(
+        if not cr.fetchone():
+            cr.execute(
                 "CREATE INDEX queue_job_identity_key_state_partial_index "
                 "ON queue_job (identity_key) WHERE state in ('pending', "
                 "'enqueued') AND identity_key IS NOT NULL;"
@@ -143,7 +142,7 @@ class QueueJob(models.Model):
         job = Job.load(self.env, self.uuid)
         action = job.related_action()
         if action is None:
-            raise exceptions.UserError(_('No action available for this job'))
+            raise exceptions.Warning(_('No action available for this job'))
         return action
 
     @api.multi

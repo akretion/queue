@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from odoo.addons.queue_job.job import Job
+from openerp.addons.queue_job.job import Job
 
 
 class JobCounter(object):

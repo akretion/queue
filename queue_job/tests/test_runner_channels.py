@@ -3,7 +3,7 @@
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 import doctest
-from odoo.addons.queue_job.jobrunner import channels
+from openerp.addons.queue_job.jobrunner import channels
 
 
 def load_tests(loader, tests, ignore):
