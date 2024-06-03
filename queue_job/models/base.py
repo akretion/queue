@@ -29,6 +29,7 @@ class Base(models.AbstractModel):
         description=None,
         channel=None,
         identity_key=None,
+        split=None,
     ):
         """Return a ``DelayableRecordset``
 
@@ -62,6 +63,7 @@ class Base(models.AbstractModel):
             description=description,
             channel=channel,
             identity_key=identity_key,
+            split=split,
         )
 
     def delayable(

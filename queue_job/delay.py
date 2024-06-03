@@ -534,6 +534,45 @@ class Delayable:
         """Delay the whole graph"""
         self._graph.delay()
 
+    def split(self, size=None):
+        """Split the Delayable into a DelayableGroup containing batches
+        of size `size`
+        """
+
+        total_records = len(self.recordset)
+        count = 1 + total_records // size
+
+        delayables = []
+        for batch in range(count):
+            start = batch * size
+            end = min((batch + 1) * size, total_records)
+            if end > start:
+                recordset = self.recordset[start:end]
+                delayable = Delayable(
+                    recordset,
+                    priority=self.priority,
+                    eta=self.eta,
+                    max_retries=self.max_retries,
+                    description="%s (split %d/%d)"
+                    % (self.description or "/", batch + 1, count),
+                    channel=self.channel,
+                    identity_key=self.identity_key,
+                )
+                if self._job_method:
+                    # Update the __self__
+                    delayable._job_method = getattr(
+                        recordset, self._job_method.__name__
+                    )
+                    delayable._job_args = self._job_args
+                    delayable._job_kwargs = self._job_kwargs
+
+                delayables.append(delayable)
+
+        # Prevent warning on deletion
+        self._generated_job = True
+
+        return DelayableGroup(*delayables)
+
     def _build_job(self):
         if self._generated_job:
             return self._generated_job
@@ -586,7 +625,7 @@ class DelayableRecordset(object):
     by :meth:`~odoo.addons.queue_job.models.base.Base.with_delay`
     """
 
-    __slots__ = ("delayable",)
+    __slots__ = ("delayable", "split")
 
     def __init__(
         self,
@@ -597,6 +636,7 @@ class DelayableRecordset(object):
         description=None,
         channel=None,
         identity_key=None,
+        split=None,
     ):
         self.delayable = Delayable(
             recordset,
@@ -607,6 +647,7 @@ class DelayableRecordset(object):
             channel=channel,
             identity_key=identity_key,
         )
+        self.split = split
 
     @property
     def recordset(self):
@@ -614,7 +655,13 @@ class DelayableRecordset(object):
 
     def __getattr__(self, name):
         def _delay_delayable(*args, **kwargs):
-            getattr(self.delayable, name)(*args, **kwargs).delay()
+            delayable = getattr(self.delayable, name)(*args, **kwargs)
+            if self.split:
+                group = delayable.split(self.split)
+                group.delay()
+                return [d._generated_job for d in group._delayables]
+
+            delayable.delay()
             return self.delayable._generated_job
 
         return _delay_delayable
